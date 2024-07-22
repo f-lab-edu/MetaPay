@@ -3,11 +3,13 @@ package com.ydmins.metapay.payment_service.domain.payment.dto;
 import com.ydmins.metapay.payment_service.domain.payment.PaymentMethod;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
+import lombok.Builder;
 import lombok.Getter;
 
 import java.math.BigDecimal;
 
 @Getter
+@Builder
 public class PaymentRequest {
     @NotNull(message = "금액을 입력해주세요.")
     @Positive

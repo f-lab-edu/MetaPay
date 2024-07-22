@@ -4,11 +4,13 @@ import com.ydmins.metapay.payment_service.domain.common.TimeBaseEntity;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Getter;
 
 import java.math.BigDecimal;
 
 @Entity
 @AllArgsConstructor
+@Getter
 @Builder
 public class Payment extends TimeBaseEntity {
 
@@ -18,6 +20,7 @@ public class Payment extends TimeBaseEntity {
 
     private BigDecimal amount;
     @Enumerated(EnumType.STRING)
+    @Builder.Default
     private PaymentStatus status = PaymentStatus.PENDING;
     @Enumerated(EnumType.STRING)
     private PaymentMethod method;

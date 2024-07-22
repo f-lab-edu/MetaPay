@@ -11,7 +11,7 @@ public class PGGatewayService {
 
     public PGResponse requestPayment(PaymentRequest request){
         return PGResponse.builder()
-                .success(true)
+                .isSuccess(true)
                 .transactionId(UUID.randomUUID().toString())
                 .amount(request.getAmount())
                 .message("Payment processed successfully")
