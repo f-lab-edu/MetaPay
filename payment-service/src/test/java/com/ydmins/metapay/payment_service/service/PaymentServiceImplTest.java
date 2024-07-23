@@ -25,7 +25,7 @@ class PaymentServiceImplTest {
     private PaymentRepository paymentRepository;
 
     @Mock
-    private PGGatewayService pgGatewayService;
+    private PGService pgService;
 
     @InjectMocks
     private PaymentServiceImpl paymentService;
@@ -55,7 +55,7 @@ class PaymentServiceImplTest {
                 .message("Payment processed successfully")
                 .build();
 
-        when(pgGatewayService.requestPayment(request)).thenReturn(pgResponse);
+        when(pgService.requestPayment(request)).thenReturn(pgResponse);
 
         // when
         boolean result = paymentService.processPayment(request);
@@ -88,7 +88,7 @@ class PaymentServiceImplTest {
                 .message("Payment failed")
                 .build();
 
-        when(pgGatewayService.requestPayment(request)).thenReturn(pgResponse);
+        when(pgService.requestPayment(request)).thenReturn(pgResponse);
 
         // when
         boolean result = paymentService.processPayment(request);
@@ -116,7 +116,7 @@ class PaymentServiceImplTest {
         // given
         PaymentRequest request = createPaymentRequest();
 
-        when(pgGatewayService.requestPayment(request)).thenThrow(new RuntimeException("Payment gateway error"));
+        when(pgService.requestPayment(request)).thenThrow(new RuntimeException("Payment gateway error"));
 
         // when
         boolean result = paymentService.processPayment(request);
@@ -149,7 +149,7 @@ class PaymentServiceImplTest {
                 .message("Payment processed successfully")
                 .build();
 
-        when(pgGatewayService.requestPayment(request)).thenReturn(pgResponse);
+        when(pgService.requestPayment(request)).thenReturn(pgResponse);
         doThrow(new DataAccessException("Database error"){}).when(paymentRepository).save(any(Payment.class));
 
         // when

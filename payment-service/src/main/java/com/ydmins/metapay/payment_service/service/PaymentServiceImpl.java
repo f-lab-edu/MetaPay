@@ -16,14 +16,14 @@ import org.springframework.stereotype.Service;
 public class PaymentServiceImpl implements PaymentService{
 
     private final PaymentRepository paymentRepository;
-    private final PGGatewayService pgGatewayService;
+    private final PGService pgService;
 
     @Override
     public boolean processPayment(PaymentRequest request) {
         Payment payment = createPaymentFromRequest(request);
         PGResponse pgResponse = null;
         try {
-            pgResponse = pgGatewayService.requestPayment(request);
+            pgResponse = pgService.requestPayment(request);
         } catch (Exception e){
             log.error("Error processing payment", e);
             payment.setStatus(PaymentStatus.FAILED);
