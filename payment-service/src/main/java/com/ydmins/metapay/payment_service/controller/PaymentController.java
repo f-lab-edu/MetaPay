@@ -15,8 +15,9 @@ public class PaymentController {
 
     private final PaymentService paymentService;
 
-    @PostMapping()
+    @PostMapping
     public boolean processPayment(@RequestBody PaymentRequest request){
+        System.out.println("requested");
         return paymentService.processPayment(request);
     }
 }
