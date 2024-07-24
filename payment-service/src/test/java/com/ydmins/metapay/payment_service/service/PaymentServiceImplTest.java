@@ -44,16 +44,36 @@ class PaymentServiceImplTest {
                 .build();
     }
 
+    private PGResponse createPGResponse(boolean isSuccess, String message){
+        return PGResponse.builder()
+                .isSuccess(isSuccess)
+                .transactionId("12345")
+                .amount(new BigDecimal("100.00"))
+                .message(message)
+                .build();
+    }
+
+    private Payment getCapturedPayment(){
+        ArgumentCaptor<Payment> paymentCaptor = ArgumentCaptor.forClass(Payment.class);
+        verify(paymentRepository, times(1)).save(paymentCaptor.capture());
+        return paymentCaptor.getValue();
+    }
+
+    private void assertPaymentDeatilsMatch(PaymentRequest request, Payment savedPayment, PaymentStatus status, String pg){
+        assertEquals(request.getAmount(), savedPayment.getAmount());
+        assertEquals(request.getAmount(), savedPayment.getAmount());
+        assertEquals(status, savedPayment.getStatus());
+        assertEquals(request.getMethod(), savedPayment.getMethod());
+        assertEquals(request.getUserId(), savedPayment.getUserId());
+        assertEquals(request.getOrderId(), savedPayment.getOrderId());
+        assertEquals(pg, savedPayment.getPaymentGateway());
+    }
+
     @Test
     void processPayment_Success() {
         // given
         PaymentRequest request = createPaymentRequest();
-        PGResponse pgResponse = PGResponse.builder()
-                .isSuccess(true)
-                .transactionId("12345")
-                .amount(new BigDecimal("100.00"))
-                .message("Payment processed successfully")
-                .build();
+        PGResponse pgResponse = createPGResponse(true,"Payment processed successfully");
 
         when(pgService.requestPayment(request)).thenReturn(pgResponse);
 
@@ -63,30 +83,16 @@ class PaymentServiceImplTest {
         // then
         assertTrue(result);
 
-        // ArgumentCaptor
-        ArgumentCaptor<Payment> paymentCaptor = ArgumentCaptor.forClass(Payment.class);
-        verify(paymentRepository, times(1)).save(paymentCaptor.capture());
-
         // Captured Payment
-        Payment savedPayment = paymentCaptor.getValue();
-        assertEquals(request.getAmount(), savedPayment.getAmount());
-        assertEquals(request.getMethod(), savedPayment.getMethod());
-        assertEquals(PaymentStatus.SUCCESSFUL, savedPayment.getStatus());
-        assertEquals(request.getUserId(), savedPayment.getUserId());
-        assertEquals(request.getOrderId(), savedPayment.getOrderId());
-        assertEquals("PG", savedPayment.getPaymentGateway());
+        Payment savedPayment = getCapturedPayment();
+        assertPaymentDeatilsMatch(request, savedPayment, PaymentStatus.SUCCESSFUL, "PG");
     }
 
     @Test
     public void processPayment_Failure(){
         // given
         PaymentRequest request = createPaymentRequest();
-        PGResponse pgResponse = PGResponse.builder()
-                .isSuccess(false)
-                .transactionId("12345")
-                .amount(new BigDecimal("100.00"))
-                .message("Payment failed")
-                .build();
+        PGResponse pgResponse = createPGResponse(false, "Payment failed");
 
         when(pgService.requestPayment(request)).thenReturn(pgResponse);
 
@@ -96,19 +102,9 @@ class PaymentServiceImplTest {
         // then
         assertFalse(result);
 
-        // ArgumentCaptor
-        ArgumentCaptor<Payment> paymentCaptor = ArgumentCaptor.forClass(Payment.class);
-        verify(paymentRepository, times(1)).save(paymentCaptor.capture());
-
         // Captured Payment
-        Payment savedPayment = paymentCaptor.getValue();
-        assertEquals(request.getAmount(), savedPayment.getAmount());
-        assertEquals(request.getAmount(), savedPayment.getAmount());
-        assertEquals(PaymentStatus.FAILED, savedPayment.getStatus());
-        assertEquals(request.getMethod(), savedPayment.getMethod());
-        assertEquals(request.getUserId(), savedPayment.getUserId());
-        assertEquals(request.getOrderId(), savedPayment.getOrderId());
-        assertEquals("PG", savedPayment.getPaymentGateway());
+        Payment savedPayment = getCapturedPayment();
+        assertPaymentDeatilsMatch(request, savedPayment, PaymentStatus.FAILED, "PG");
     }
 
     @Test
@@ -124,30 +120,16 @@ class PaymentServiceImplTest {
         // then
         assertFalse(result);
 
-        // ArgumentCaptor
-        ArgumentCaptor<Payment> paymentCaptor = ArgumentCaptor.forClass(Payment.class);
-        verify(paymentRepository, times(1)).save(paymentCaptor.capture());
-
         // Captured Payment
-        Payment savedPayment = paymentCaptor.getValue();
-        assertEquals(request.getAmount(), savedPayment.getAmount());
-        assertEquals(PaymentStatus.FAILED, savedPayment.getStatus());
-        assertEquals(request.getMethod(), savedPayment.getMethod());
-        assertEquals(request.getUserId(), savedPayment.getUserId());
-        assertEquals(request.getOrderId(), savedPayment.getOrderId());
-        assertEquals("PG", savedPayment.getPaymentGateway());
+        Payment savedPayment = getCapturedPayment();
+        assertPaymentDeatilsMatch(request, savedPayment, PaymentStatus.FAILED, "PG");
     }
 
     @Test
     public void processPayment_PaymentRepositoryException(){
         // given
         PaymentRequest request = createPaymentRequest();
-        PGResponse pgResponse = PGResponse.builder()
-                .isSuccess(true)
-                .transactionId("12345")
-                .amount(new BigDecimal("100.00"))
-                .message("Payment processed successfully")
-                .build();
+        PGResponse pgResponse = createPGResponse(true, "Payment proccssed successfully");
 
         when(pgService.requestPayment(request)).thenReturn(pgResponse);
         doThrow(new DataAccessException("Database error"){}).when(paymentRepository).save(any(Payment.class));
@@ -158,17 +140,8 @@ class PaymentServiceImplTest {
         // then
         assertTrue(result);
 
-        // ArgumentCaptor
-        ArgumentCaptor<Payment> paymentCaptor = ArgumentCaptor.forClass(Payment.class);
-        verify(paymentRepository, times(1)).save(paymentCaptor.capture());
-
         // Captured Payment
-        Payment savedPayment = paymentCaptor.getValue();
-        assertEquals(request.getAmount(), savedPayment.getAmount());
-        assertEquals(PaymentStatus.SUCCESSFUL, savedPayment.getStatus());
-        assertEquals(request.getMethod(), savedPayment.getMethod());
-        assertEquals(request.getUserId(), savedPayment.getUserId());
-        assertEquals(request.getOrderId(), savedPayment.getOrderId());
-        assertEquals("PG", savedPayment.getPaymentGateway());
+        Payment savedPayment = getCapturedPayment();
+        assertPaymentDeatilsMatch(request, savedPayment, PaymentStatus.SUCCESSFUL, "PG");
     }
 }
