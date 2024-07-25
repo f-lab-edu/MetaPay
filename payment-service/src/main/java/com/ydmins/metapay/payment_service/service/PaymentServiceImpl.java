@@ -21,29 +21,9 @@ public class PaymentServiceImpl implements PaymentService{
     @Override
     public boolean processPayment(PaymentRequest request) {
         Payment payment = createPaymentFromRequest(request);
-        PGResponse pgResponse = null;
-        try {
-            pgResponse = pgService.requestPayment(request);
-        } catch (Exception e){
-            log.error("Error processing payment", e);
-            payment.setStatus(PaymentStatus.FAILED);
-        }
-        if (pgResponse != null){
-            if(pgResponse.isSuccess()){
-                payment.setStatus(PaymentStatus.SUCCESSFUL);
-            } else {
-                payment.setStatus(PaymentStatus.FAILED);
-            }
-        }
-        try {
-            paymentRepository.save(payment);
-        } catch (Exception e){
-            log.error("Failed to save payment",e);
-        }
-        if(pgResponse == null){
-            return false;
-        }
-        return pgResponse.isSuccess();
+        PGResponse pgResponse = processPGPayment(request, payment);
+        savePayment(payment);
+        return pgResponse != null && pgResponse.isSuccess();
     }
 
     private Payment createPaymentFromRequest(PaymentRequest request){
@@ -55,5 +35,29 @@ public class PaymentServiceImpl implements PaymentService{
                 .paymentGateway("PG")
                 .build();
         return payment;
+    }
+
+    private PGResponse processPGPayment(PaymentRequest request, Payment payment){
+        try {
+            PGResponse pgResponse = pgService.requestPayment(request);
+            updatePaymentStatus(payment, pgResponse.isSuccess());
+            return pgResponse;
+        } catch (Exception e){
+            log.error("Error processing payment", e);
+            payment.setStatus(PaymentStatus.FAILED);
+            return null;
+        }
+    }
+
+    private void updatePaymentStatus(Payment payment, boolean isSuccess){
+        payment.setStatus(isSuccess ? PaymentStatus.SUCCESSFUL : PaymentStatus.FAILED);
+    }
+
+    private void savePayment(Payment payment){
+        try {
+            paymentRepository.save(payment);
+        } catch (Exception e){
+            log.error("Failed to save payment",e);
+        }
     }
 }
