@@ -59,7 +59,8 @@ class PaymentServiceImplTest {
         return paymentCaptor.getValue();
     }
 
-    private void assertPaymentDeatilsMatch(PaymentRequest request, Payment savedPayment, PaymentStatus status, String pg){
+    private void assertPaymentDetailsMatch(PaymentRequest request, Payment savedPayment, PaymentStatus status,
+                                          String pg){
         assertEquals(request.getAmount(), savedPayment.getAmount());
         assertEquals(request.getAmount(), savedPayment.getAmount());
         assertEquals(status, savedPayment.getStatus());
@@ -85,7 +86,7 @@ class PaymentServiceImplTest {
 
         // Captured Payment
         Payment savedPayment = getCapturedPayment();
-        assertPaymentDeatilsMatch(request, savedPayment, PaymentStatus.SUCCESSFUL, "PG");
+        assertPaymentDetailsMatch(request, savedPayment, PaymentStatus.SUCCESSFUL, "PG");
     }
 
     @Test
@@ -104,7 +105,7 @@ class PaymentServiceImplTest {
 
         // Captured Payment
         Payment savedPayment = getCapturedPayment();
-        assertPaymentDeatilsMatch(request, savedPayment, PaymentStatus.FAILED, "PG");
+        assertPaymentDetailsMatch(request, savedPayment, PaymentStatus.FAILED, "PG");
     }
 
     @Test
@@ -122,7 +123,7 @@ class PaymentServiceImplTest {
 
         // Captured Payment
         Payment savedPayment = getCapturedPayment();
-        assertPaymentDeatilsMatch(request, savedPayment, PaymentStatus.FAILED, "PG");
+        assertPaymentDetailsMatch(request, savedPayment, PaymentStatus.FAILED, "PG");
     }
 
     @Test
@@ -142,6 +143,6 @@ class PaymentServiceImplTest {
 
         // Captured Payment
         Payment savedPayment = getCapturedPayment();
-        assertPaymentDeatilsMatch(request, savedPayment, PaymentStatus.SUCCESSFUL, "PG");
+        assertPaymentDetailsMatch(request, savedPayment, PaymentStatus.SUCCESSFUL, "PG");
     }
 }
