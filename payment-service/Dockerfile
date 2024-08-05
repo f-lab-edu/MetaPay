@@ -20,4 +20,7 @@ EXPOSE 8080
 COPY --from=test-stage /app/build/libs/*.jar app.jar
 COPY /src/main/resources/application-mysql.properties /app/config/application-mysql.properties
 ENV SPRING_PROFILES_ACTIVE=mysql
+ENV SPRING_DATASOURCE_URL=$SPRING_DATASOURCE_URL
+ENV SPRING_DATASOURCE_USERNAME=$SPRING_DATASOURCE_USERNAME
+ENV SPRING_DATASOURCE_PASSWORD=$SPRING_DATASOURCE_PASSWORD
 ENTRYPOINT ["java", "-jar", "app.jar", "--spring.config.additional-location=file:/app/config/application-mysql.properties"]
