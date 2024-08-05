@@ -71,7 +71,7 @@ class PaymentServiceImplTest {
     }
 
     @Test
-    void processPayment_Success() {
+    void processPaymentSuccess() {
         // given
         PaymentRequest request = createPaymentRequest();
         PGResponse pgResponse = createPGResponse(true,"Payment processed successfully");
@@ -90,7 +90,7 @@ class PaymentServiceImplTest {
     }
 
     @Test
-    public void processPayment_Failure(){
+    public void processPaymentFailure(){
         // given
         PaymentRequest request = createPaymentRequest();
         PGResponse pgResponse = createPGResponse(false, "Payment failed");
@@ -109,7 +109,7 @@ class PaymentServiceImplTest {
     }
 
     @Test
-    public void processPayment_PGGatewayServiceException(){
+    public void processPaymentPGServiceException(){
         // given
         PaymentRequest request = createPaymentRequest();
 
@@ -127,7 +127,7 @@ class PaymentServiceImplTest {
     }
 
     @Test
-    public void processPayment_PaymentRepositoryException(){
+    public void processPaymentPaymentRepositoryException(){
         // given
         PaymentRequest request = createPaymentRequest();
         PGResponse pgResponse = createPGResponse(true, "Payment proccssed successfully");

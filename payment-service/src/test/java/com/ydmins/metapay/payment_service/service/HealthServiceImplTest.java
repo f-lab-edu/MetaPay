@@ -38,7 +38,7 @@ class HealthServiceImplTest {
     }
 
     @Test
-    void checkHealth_allHealty() throws SQLException{
+    void checkHealthAllHealthy() throws SQLException{
         // when
         when(connection.isValid(3000)).thenReturn(true);
         Health health = healthService.checkHealth();
@@ -48,7 +48,7 @@ class HealthServiceImplTest {
     }
 
     @Test
-    void checkHealth_databaseUnhealthy() throws SQLException{
+    void checkHealthDatabaseUnhealthy() throws SQLException{
         // when
         when(connection.isValid(3000)).thenReturn(false);
         Health health = healthService.checkHealth();
@@ -58,7 +58,7 @@ class HealthServiceImplTest {
     }
 
     @Test
-    void checkHealth_databaseException() throws SQLException{
+    void checkHealthDatabaseException() throws SQLException{
         // when
         when(connection.isValid(3000)).thenThrow(new SQLException("Database error"));
         Health health = healthService.checkHealth();
@@ -69,7 +69,7 @@ class HealthServiceImplTest {
 
 
     @Test
-    void health_returnsSameAsCheckHealth() throws SQLException{
+    void healthReturnsSameAsCheckHealth() throws SQLException{
         // when
         when(connection.isValid(3000)).thenReturn(true);
         Health healthFrom_checkHealth = healthService.checkHealth();
