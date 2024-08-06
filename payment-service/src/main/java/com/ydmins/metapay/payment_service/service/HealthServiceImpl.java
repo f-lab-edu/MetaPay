@@ -1,6 +1,7 @@
 package com.ydmins.metapay.payment_service.service;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.actuate.health.Health;
 import org.springframework.boot.actuate.health.HealthIndicator;
 import org.springframework.stereotype.Service;
@@ -12,23 +13,27 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class HealthServiceImpl implements HealthService, HealthIndicator {
 
     private final DataSource dataSource;
 
+    private static final String SERVICE = "service";
+    private static final String DATABASE = "database";
+
     @Override
     public Health checkHealth() {
-        Map<String, Object> details = new HashMap<>();
-        details.put("service", checkService());
-        details.put("database", checkDatabase());
+        boolean isServiceHealthy = checkService();
+        boolean isDatabaseHealthy = checkDatabase();
 
-        boolean isHealthy = (boolean) details.get("service")
-                && (boolean) details.get("database");
+        Health.Builder healthBuilder = Health.status("")
+                .withDetail(SERVICE, isServiceHealthy)
+                .withDetail(DATABASE, isDatabaseHealthy);
 
-        return isHealthy ?
-                Health.up().withDetails(details).build() :
-                Health.down().withDetails(details).build();
+        return (isServiceHealthy && isDatabaseHealthy)
+                ? healthBuilder.up().build()
+                : healthBuilder.down().build();
     }
 
     private boolean checkService(){
@@ -40,6 +45,7 @@ public class HealthServiceImpl implements HealthService, HealthIndicator {
             Connection conn = dataSource.getConnection();
             return conn.isValid(3000);
         } catch (SQLException e){
+            log.error("Database connection validation failed", e);
             return false;
         }
     }
