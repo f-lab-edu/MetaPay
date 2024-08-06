@@ -31,7 +31,9 @@ public class HealthServiceImpl implements HealthService, HealthIndicator {
                 .withDetail(SERVICE, isServiceHealthy)
                 .withDetail(DATABASE, isDatabaseHealthy);
 
-        return (isServiceHealthy && isDatabaseHealthy)
+        boolean isHealthy = isServiceHealthy && isDatabaseHealthy;
+
+        return isHealthy
                 ? healthBuilder.up().build()
                 : healthBuilder.down().build();
     }
