@@ -16,6 +16,7 @@ RUN ./gradlew test --no-daemon
 # Runtime Stage
 FROM openjdk:17-jdk-slim AS runtime-stage
 WORKDIR /app
+ENV PORT=8080
 EXPOSE $PORT
 COPY --from=test-stage /app/build/libs/*.jar app.jar
 COPY /src/main/resources/application-mysql.properties /app/config/application-mysql.properties
