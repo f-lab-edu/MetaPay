@@ -24,4 +24,4 @@ ENV SPRING_PROFILES_ACTIVE=mysql
 ENV SPRING_DATASOURCE_URL=$SPRING_DATASOURCE_URL
 ENV SPRING_DATASOURCE_USERNAME=$SPRING_DATASOURCE_USERNAME
 ENV SPRING_DATASOURCE_PASSWORD=$SPRING_DATASOURCE_PASSWORD
-ENTRYPOINT ["java", "-jar", "app.jar", "--spring.config.additional-location=file:/app/config/application-mysql.properties"]
+ENTRYPOINT ["java", "-jar", "app.jar", "--server.port=${PORT} --spring.config.additional-location=file:/app/config/application-mysql.properties"]
