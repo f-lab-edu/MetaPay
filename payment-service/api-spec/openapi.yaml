@@ -1,0 +1,454 @@
+openapi: 3.0.0
+info:
+  title: Meta Pay Payment Service API
+  version: 1.0.0
+  description: API for managing payments
+
+paths:
+  /payments/card:
+    post:
+      summary: Register a card
+      description: Registers a new card information for payments.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CardRegisterRequest'
+      responses:
+        '201':
+          description: Card payment successfully created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      type: boolean
+                      enum: [true]
+                      description: Always returns true for successful operations
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500' :
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /payments/card/{cardId}:
+    delete:
+      summary: Delete a card
+      description: Deletes a specific card payment information.
+      parameters:
+        - in: path
+          name: cardId
+          required: true
+          schema:
+            type: string
+          description: The ID of the card payment to delete
+
+  /payments/cards:
+    get:
+      summary: Get card list
+      description: Retrieves a list of all card payments.
+      responses:
+        '200':
+          description: List of card payments
+          content:
+            application/json:
+              type: array
+              items:
+                $ref: '#/components/schemas/CardPaymentResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /payments/account:
+    post:
+      summary: Register an account
+      description: Registers a new account for payments.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AccountRegisterRequest'
+      responses:
+        '201':
+          description: Accouint payment successfully created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      type: boolean
+                      enum: [ true ]
+                      description: Always returns true for successful operations
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /payments/account/{accountId}:
+    delete:
+      summary: Delete an account
+      description: Delete a specific account payment information.
+      parameters:
+        - in: path
+          name: accountId
+          required: true
+          schema:
+            type: string
+          description: The ID of the account payment to delete
+      responses:
+        '201':
+          description: The account payment successfully deleted
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      type: boolean
+                      enum: [ true ]
+                      description: Always returns true for successful operations
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /payments/accounts:
+    get:
+      summary: Get account list
+      description: Retrieves a list of all account payments.
+      responses:
+        '200':
+          description: List of account payments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/AccountPaymentResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /payments:
+    post:
+      summary: Create a payment
+      description: Creates a new payment.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PaymentRequest'
+      responses:
+        '201':
+          description: Payment successfully created
+          content:
+            application/json:
+              schema:
+                allOf:
+                  - $ref: '#/components/schemas/SuccessResponse'
+                  - type: object
+                    properties:
+                      type: boolean
+                      enum: [ true ]
+                      description: Always returns true for successful operations
+        '400':
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    get:
+      summary: Get all payment information
+      description: Retrieves information about all payments.
+      responses:
+        '200':
+          description: List of all payments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PaymentResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /payments/{paymentId}:
+    get:
+      summary: Get individual payment information
+      description: Retrieves information about a specific payment.
+      parameters:
+        - in: path
+          name: paymentId
+          required: true
+          schema:
+            type: string
+          description: The ID of the payment used to retrieve the payment list.
+      responses:
+        '200':
+          description: Payment information
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaymentResponse'
+        '404':
+          description: Payment not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    SuccessResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          description: HTTP Status
+          example: "200 Created"
+        message:
+          type: string
+          description: Error Message
+          example: "Resource successfully created"
+        result:
+          type: object
+          description: The result of the request
+          additionalProperties: true
+
+    ErrorResponse:
+      type: object
+      properties:
+        status:
+          type: string
+          description: HTTP Status
+          example: "400 Bad Request"
+        message:
+          type: string
+          description: Error Message
+          example: "Invalid input data"
+
+    CardRegisterRequest:
+      type: object
+      required:
+        - cardNumber
+        - expirationDate
+        - cvv
+        - billingAddress
+      properties:
+        cardNumber:
+          type: string
+          description: The card number
+          example: "1234000012340000"
+        expirationDate:
+          type: string
+          description: The card expiration date (MM/YY)
+          example: "12/26"
+        cvv:
+          type: string
+          description: The card CVV
+          example: "123"
+        billingAddress:
+          $ref: '#/components/schemas/BillingAddress'
+
+    CardPaymentResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique identifier for the card payment
+        cardNumber:
+          type: string
+          description: Masked card number
+        expirationDate:
+          type: string
+          description: Card expiration date (MM/YY)
+        createdAt:
+          type: string
+          format: date-time
+          description: The timestamp when the card payment was created
+
+    AccountRegisterRequest:
+      type: object
+      required:
+        - accountNumber
+        - bankName
+      properties:
+        accountNumber:
+          type: string
+          description: The account number
+          example: "123456789123"
+        bankName:
+          type: string
+          description: The name of the bank
+          example: "Meta Bank"
+
+    AccountPaymentResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique identifier for the account payment
+        accountNumber:
+          type: string
+          description: Masked account number
+        bankName:
+          type: string
+          description: Name of the bank
+        createdAt:
+          type: string
+          format: date-time
+          description: The timestamp when the account payment was created
+
+    PaymentRequest:
+      type: object
+      required:
+        - amount
+        - method
+        - userId
+        - orderId
+      properties:
+        amount:
+          type: string
+          format: decimal
+          description: The payment amount int the specified currency. Represented as a decimal number with up to 4 decimal places for maximum precision. For example, 10,5 represents $10.50, and 100.0000 represents exactly $100.
+          example: "99.99"
+        currency:
+          type: string
+          description: The three-letter ISO 4217 currency code
+          example: "USD"
+        method:
+          type: string
+          description: Indicates payment method used for the transaction.
+          enum: [CREDIT_CARD, DEBIT_CARD, BANK_TRANSFER]
+          example: "CREDIT_CARD"
+        userId:
+          type: string
+          description: Unique identifier for the user making the payment.
+          example: "user12345"
+        orderId:
+          type: string
+          description: Unique identifier for the order associated with this payment.
+          example: "order12345"
+
+    PaymentResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          description: The unique identifier for the payment
+        amount:
+          type: number
+          description: The payment amount
+        currency:
+          type: string
+          description: The currency of the payment
+        method:
+          type: string
+          description: The payment method
+          enum: [ CREDIT_CARD, DEBIT_CARD, BANK_TRANSFER ]
+          example: "CREDIT_CARD"
+        status:
+          type: string
+          description: The status of the payment
+        createdAt:
+          type: string
+          format: date-time
+          description: The timestamp when the payment was created
+
+    BillingAddress:
+      type: object
+      description: The billing address associated with the payment method
+      required:
+        -streetAddress
+        -city
+        -country
+      properties:
+        streetAddress:
+          type: string
+          description: The street address, including house number and street name
+          example: "Jongro 1 Beongil 23"
+        additionalAddress:
+          type: string
+          description: Additional address information(e.g., apartment, suite, unit)
+          example: "Apt 4B"
+        city:
+          type: string
+          description: The city name
+          example: "Yangju"
+        stateProvince:
+          type: string
+          description: The state, province, prefecture, or region
+          example: "Gyeonggi"
+        postalCode:
+          type: string
+          description: The postal code or ZIP code
+          example: "10034"
+        country:
+          type: string
+          description: The country name or ISO country code
+          example: "Republic of Korea"
