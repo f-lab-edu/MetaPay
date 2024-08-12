@@ -59,7 +59,8 @@ class PaymentServiceImplTest {
         return paymentCaptor.getValue();
     }
 
-    private void assertPaymentDeatilsMatch(PaymentRequest request, Payment savedPayment, PaymentStatus status, String pg){
+    private void assertPaymentDetailsMatch(PaymentRequest request, Payment savedPayment, PaymentStatus status,
+                                          String pg){
         assertEquals(request.getAmount(), savedPayment.getAmount());
         assertEquals(request.getAmount(), savedPayment.getAmount());
         assertEquals(status, savedPayment.getStatus());
@@ -70,7 +71,7 @@ class PaymentServiceImplTest {
     }
 
     @Test
-    void processPayment_Success() {
+    void processPaymentSuccess() {
         // given
         PaymentRequest request = createPaymentRequest();
         PGResponse pgResponse = createPGResponse(true,"Payment processed successfully");
@@ -85,11 +86,11 @@ class PaymentServiceImplTest {
 
         // Captured Payment
         Payment savedPayment = getCapturedPayment();
-        assertPaymentDeatilsMatch(request, savedPayment, PaymentStatus.SUCCESSFUL, "PG");
+        assertPaymentDetailsMatch(request, savedPayment, PaymentStatus.SUCCESSFUL, "PG");
     }
 
     @Test
-    public void processPayment_Failure(){
+    public void processPaymentFailure(){
         // given
         PaymentRequest request = createPaymentRequest();
         PGResponse pgResponse = createPGResponse(false, "Payment failed");
@@ -104,11 +105,11 @@ class PaymentServiceImplTest {
 
         // Captured Payment
         Payment savedPayment = getCapturedPayment();
-        assertPaymentDeatilsMatch(request, savedPayment, PaymentStatus.FAILED, "PG");
+        assertPaymentDetailsMatch(request, savedPayment, PaymentStatus.FAILED, "PG");
     }
 
     @Test
-    public void processPayment_PGGatewayServiceException(){
+    public void processPaymentPGServiceException(){
         // given
         PaymentRequest request = createPaymentRequest();
 
@@ -122,11 +123,11 @@ class PaymentServiceImplTest {
 
         // Captured Payment
         Payment savedPayment = getCapturedPayment();
-        assertPaymentDeatilsMatch(request, savedPayment, PaymentStatus.FAILED, "PG");
+        assertPaymentDetailsMatch(request, savedPayment, PaymentStatus.FAILED, "PG");
     }
 
     @Test
-    public void processPayment_PaymentRepositoryException(){
+    public void processPaymentPaymentRepositoryException(){
         // given
         PaymentRequest request = createPaymentRequest();
         PGResponse pgResponse = createPGResponse(true, "Payment proccssed successfully");
@@ -142,6 +143,6 @@ class PaymentServiceImplTest {
 
         // Captured Payment
         Payment savedPayment = getCapturedPayment();
-        assertPaymentDeatilsMatch(request, savedPayment, PaymentStatus.SUCCESSFUL, "PG");
+        assertPaymentDetailsMatch(request, savedPayment, PaymentStatus.SUCCESSFUL, "PG");
     }
 }
