@@ -1,6 +1,5 @@
-<<<<<<< HEAD
-/.idea
-=======
+lib/
+
 ### IntelliJ IDEA ###
 .idea
 *.iws
@@ -38,4 +37,3 @@ bin/
 /dist/
 /nbdist/
 /.nb-gradle/
->>>>>>> feature/readme
