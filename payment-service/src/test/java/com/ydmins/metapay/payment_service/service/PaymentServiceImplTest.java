@@ -41,15 +41,17 @@ class PaymentServiceImplTest {
                 .method(PaymentMethod.CREDIT_CARD)
                 .userId("userid")
                 .orderId("12341234DA")
+                .idempotencyKey("12345")
                 .build();
     }
 
-    private PGResponse createPGResponse(boolean isSuccess, String message){
+    private PGResponse createPGResponse(boolean isSuccess, String message, String idempotencyKey){
         return PGResponse.builder()
                 .isSuccess(isSuccess)
                 .transactionId("12345")
                 .amount(new BigDecimal("100.00"))
                 .message(message)
+                .idempotencyKey(idempotencyKey)
                 .build();
     }
 
@@ -74,8 +76,9 @@ class PaymentServiceImplTest {
     void processPaymentSuccess() {
         // given
         PaymentRequest request = createPaymentRequest();
-        PGResponse pgResponse = createPGResponse(true,"Payment processed successfully");
+        PGResponse pgResponse = createPGResponse(true,"Payment processed successfully", request.getIdempotencyKey());
 
+        when(paymentRepository.existsByIdempotencyKey(request.getIdempotencyKey())).thenReturn(false);
         when(pgService.requestPayment(request)).thenReturn(pgResponse);
 
         // when
@@ -84,17 +87,35 @@ class PaymentServiceImplTest {
         // then
         assertTrue(result);
 
+        verify(paymentRepository).save(any(Payment.class));
         // Captured Payment
         Payment savedPayment = getCapturedPayment();
         assertPaymentDetailsMatch(request, savedPayment, PaymentStatus.SUCCESSFUL, "PG");
     }
 
     @Test
+    void processPaymentAlreadyProcessed() {
+        // given
+        PaymentRequest request = createPaymentRequest();
+        PGResponse pgResponse = createPGResponse(true,"Payment processed successfully", request.getIdempotencyKey());
+
+        when(paymentRepository.existsByIdempotencyKey(anyString())).thenReturn(true);
+        when(pgService.requestPayment(request)).thenReturn(pgResponse);
+
+        // when
+        boolean result = paymentService.processPayment(request);
+
+        // then
+        assertTrue(result);
+    }
+
+    @Test
     public void processPaymentFailure(){
         // given
         PaymentRequest request = createPaymentRequest();
-        PGResponse pgResponse = createPGResponse(false, "Payment failed");
+        PGResponse pgResponse = createPGResponse(false, "Payment failed", request.getIdempotencyKey());
 
+        when(paymentRepository.existsByIdempotencyKey(anyString())).thenReturn(false);
         when(pgService.requestPayment(request)).thenReturn(pgResponse);
 
         // when
@@ -113,6 +134,7 @@ class PaymentServiceImplTest {
         // given
         PaymentRequest request = createPaymentRequest();
 
+        when(paymentRepository.existsByIdempotencyKey(anyString())).thenReturn(false);
         when(pgService.requestPayment(request)).thenThrow(new RuntimeException("Payment gateway error"));
 
         // when
@@ -130,8 +152,9 @@ class PaymentServiceImplTest {
     public void processPaymentPaymentRepositoryException(){
         // given
         PaymentRequest request = createPaymentRequest();
-        PGResponse pgResponse = createPGResponse(true, "Payment proccssed successfully");
+        PGResponse pgResponse = createPGResponse(true, "Payment proccssed successfully", request.getIdempotencyKey());
 
+        when(paymentRepository.existsByIdempotencyKey(anyString())).thenReturn(false);
         when(pgService.requestPayment(request)).thenReturn(pgResponse);
         doThrow(new DataAccessException("Database error"){}).when(paymentRepository).save(any(Payment.class));
 

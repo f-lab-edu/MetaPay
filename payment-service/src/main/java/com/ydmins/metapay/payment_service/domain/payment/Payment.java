@@ -26,6 +26,8 @@ public class Payment extends TimeBaseEntity {
     private PaymentMethod method;
     private String errorMessage;
     private String paymentGateway;
+    @Column(unique = true, name="idempotency_key")
+    private String idempotencyKey;
 
     private String userId;
     private String orderId;
