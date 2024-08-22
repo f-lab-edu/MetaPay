@@ -1,6 +1,7 @@
 package com.ydmins.metapay.payment_service.controller;
 
 import com.ydmins.metapay.payment_service.domain.payment.dto.PaymentRequest;
+import com.ydmins.metapay.payment_service.exception.PaymentProcessingException;
 import com.ydmins.metapay.payment_service.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -18,6 +19,11 @@ public class PaymentController {
     @PostMapping
     public boolean processPayment(@RequestBody PaymentRequest request){
         System.out.println("requested");
-        return paymentService.processPayment(request);
+        try{
+            return paymentService.processPayment(request);
+        } catch (PaymentProcessingException e){
+            // 추후 ResponseEntity 추가할 예정
+            return false;
+        }
     }
 }

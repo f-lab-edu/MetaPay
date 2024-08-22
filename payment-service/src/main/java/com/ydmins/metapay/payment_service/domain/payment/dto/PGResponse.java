@@ -12,5 +12,4 @@ public class PGResponse {
     private String transactionId;
     private BigDecimal amount;
     private String message;
-    private String idempotencyKey;
 }

@@ -20,6 +20,4 @@ public class PaymentRequest {
     private String userId;
     @NotNull(message = "주문번호를 입력해주세요.")
     private String orderId;
-    @NotNull(message = "멱등성 키를 입력해주세요.")
-    private String idempotencyKey;
 }
