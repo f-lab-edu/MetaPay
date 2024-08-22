@@ -21,7 +21,7 @@ public class PGService {
         } catch (Exception e){
             // 추후 예외상황 자세히 수정가능
             log.error("Payment Processing failed: {}", e.getMessage());
-            throw new PGCommunicationException("Payment request failed due to an unexpected error", e);
+            throw new PGCommunicationException("PG Communication failed", e);
         }
     }
 

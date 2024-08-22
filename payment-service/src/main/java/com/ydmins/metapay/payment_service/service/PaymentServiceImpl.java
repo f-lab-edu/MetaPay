@@ -31,7 +31,7 @@ public class PaymentServiceImpl implements PaymentService{
             handlePaymentPersistenceFailure(payment, e);
         } catch (Exception e) {
             log.error("Unexpected error during payment processing", e);
-            throw new PaymentProcessingException("An unexpected error occurred. Please contact support.", e);
+            throw new PaymentProcessingException("An unexpected error occurred. Please contact support", e);
         }
         return false;
     }

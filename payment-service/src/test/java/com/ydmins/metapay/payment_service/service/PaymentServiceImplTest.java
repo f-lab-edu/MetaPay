@@ -5,14 +5,14 @@ import com.ydmins.metapay.payment_service.domain.payment.PaymentMethod;
 import com.ydmins.metapay.payment_service.domain.payment.PaymentStatus;
 import com.ydmins.metapay.payment_service.domain.payment.dto.PGResponse;
 import com.ydmins.metapay.payment_service.domain.payment.dto.PaymentRequest;
-import com.ydmins.metapay.payment_service.repository.PaymentRepository;
+import com.ydmins.metapay.payment_service.exception.PGCommunicationException;
+import com.ydmins.metapay.payment_service.exception.PaymentPersistenceException;
+import com.ydmins.metapay.payment_service.exception.PaymentProcessingException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.dao.DataAccessException;
 
 import java.math.BigDecimal;
 
@@ -20,15 +20,14 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class PaymentServiceImplTest {
-
-    @Mock
-    private PaymentRepository paymentRepository;
-
     @Mock
     private PGService pgService;
 
     @InjectMocks
     private PaymentServiceImpl paymentService;
+
+    @Mock
+    private PaymentPersistenceService paymentPersistenceService;
 
     @BeforeEach
     public void setUp() {
@@ -41,45 +40,26 @@ class PaymentServiceImplTest {
                 .method(PaymentMethod.CREDIT_CARD)
                 .userId("userid")
                 .orderId("12341234DA")
-                .idempotencyKey("12345")
                 .build();
     }
 
-    private PGResponse createPGResponse(boolean isSuccess, String message, String idempotencyKey){
+    private PGResponse createPGResponse(boolean isSuccess, String message){
         return PGResponse.builder()
                 .isSuccess(isSuccess)
                 .transactionId("12345")
                 .amount(new BigDecimal("100.00"))
                 .message(message)
-                .idempotencyKey(idempotencyKey)
                 .build();
     }
 
-    private Payment getCapturedPayment(){
-        ArgumentCaptor<Payment> paymentCaptor = ArgumentCaptor.forClass(Payment.class);
-        verify(paymentRepository, times(1)).save(paymentCaptor.capture());
-        return paymentCaptor.getValue();
-    }
-
-    private void assertPaymentDetailsMatch(PaymentRequest request, Payment savedPayment, PaymentStatus status,
-                                          String pg){
-        assertEquals(request.getAmount(), savedPayment.getAmount());
-        assertEquals(request.getAmount(), savedPayment.getAmount());
-        assertEquals(status, savedPayment.getStatus());
-        assertEquals(request.getMethod(), savedPayment.getMethod());
-        assertEquals(request.getUserId(), savedPayment.getUserId());
-        assertEquals(request.getOrderId(), savedPayment.getOrderId());
-        assertEquals(pg, savedPayment.getPaymentGateway());
-    }
-
     @Test
-    void processPaymentSuccess() {
+    void processPaymentSuccess() throws PaymentProcessingException {
         // given
         PaymentRequest request = createPaymentRequest();
-        PGResponse pgResponse = createPGResponse(true,"Payment processed successfully", request.getIdempotencyKey());
+        PGResponse pgResponse = createPGResponse(true, "Payment processed successfully");
 
-        when(paymentRepository.existsByIdempotencyKey(request.getIdempotencyKey())).thenReturn(false);
-        when(pgService.requestPayment(request)).thenReturn(pgResponse);
+        when(pgService.requestPayment(eq(request))).thenReturn(pgResponse);
+        when(paymentPersistenceService.savePayment(any(Payment.class))).thenReturn(true);
 
         // when
         boolean result = paymentService.processPayment(request);
@@ -87,36 +67,18 @@ class PaymentServiceImplTest {
         // then
         assertTrue(result);
 
-        verify(paymentRepository).save(any(Payment.class));
-        // Captured Payment
-        Payment savedPayment = getCapturedPayment();
-        assertPaymentDetailsMatch(request, savedPayment, PaymentStatus.SUCCESSFUL, "PG");
+        verify(pgService).requestPayment(any(PaymentRequest.class));
+        verify(paymentPersistenceService).savePayment(argThat(payment -> payment.getStatus() == PaymentStatus.SUCCESSFUL));
     }
 
     @Test
-    void processPaymentAlreadyProcessed() {
+    void processPaymentPGCommunicationFailure() throws PaymentProcessingException, PGCommunicationException {
         // given
         PaymentRequest request = createPaymentRequest();
-        PGResponse pgResponse = createPGResponse(true,"Payment processed successfully", request.getIdempotencyKey());
+        PGResponse pgResponse = createPGResponse(false, "Payment request failed due to an unexpected error");
 
-        when(paymentRepository.existsByIdempotencyKey(anyString())).thenReturn(true);
-        when(pgService.requestPayment(request)).thenReturn(pgResponse);
-
-        // when
-        boolean result = paymentService.processPayment(request);
-
-        // then
-        assertTrue(result);
-    }
-
-    @Test
-    public void processPaymentFailure(){
-        // given
-        PaymentRequest request = createPaymentRequest();
-        PGResponse pgResponse = createPGResponse(false, "Payment failed", request.getIdempotencyKey());
-
-        when(paymentRepository.existsByIdempotencyKey(anyString())).thenReturn(false);
-        when(pgService.requestPayment(request)).thenReturn(pgResponse);
+        when(pgService.requestPayment(eq(request))).thenThrow(new PGCommunicationException("PG Communication failed"));
+        when(paymentPersistenceService.savePayment(any(Payment.class))).thenReturn(true);
 
         // when
         boolean result = paymentService.processPayment(request);
@@ -124,18 +86,19 @@ class PaymentServiceImplTest {
         // then
         assertFalse(result);
 
-        // Captured Payment
-        Payment savedPayment = getCapturedPayment();
-        assertPaymentDetailsMatch(request, savedPayment, PaymentStatus.FAILED, "PG");
+        verify(pgService).requestPayment(any(PaymentRequest.class));
+        verify(paymentPersistenceService).savePayment(argThat(payment -> payment.getStatus() == PaymentStatus.FAILED));
     }
 
     @Test
-    public void processPaymentPGServiceException(){
+    void processPaymentPersistenceFailure() throws PaymentProcessingException, PGCommunicationException{
         // given
         PaymentRequest request = createPaymentRequest();
+        PGResponse pgResponse = createPGResponse(false, "Payment processed successfully");
 
-        when(paymentRepository.existsByIdempotencyKey(anyString())).thenReturn(false);
-        when(pgService.requestPayment(request)).thenThrow(new RuntimeException("Payment gateway error"));
+        when(pgService.requestPayment(eq(request))).thenReturn(pgResponse);
+        when(paymentPersistenceService.savePayment(any(Payment.class))).thenThrow(new PaymentPersistenceException(
+                "Failed to save payment result"));
 
         // when
         boolean result = paymentService.processPayment(request);
@@ -143,29 +106,37 @@ class PaymentServiceImplTest {
         // then
         assertFalse(result);
 
-        // Captured Payment
-        Payment savedPayment = getCapturedPayment();
-        assertPaymentDetailsMatch(request, savedPayment, PaymentStatus.FAILED, "PG");
+        verify(pgService).requestPayment(any(PaymentRequest.class));
+        verify(paymentPersistenceService).savePayment(argThat(payment -> payment.getStatus() == PaymentStatus.FAILED));
     }
 
     @Test
-    public void processPaymentPaymentRepositoryException(){
+    void processPaymentUnexpectedFailureAtPGCommunication(){
         // given
         PaymentRequest request = createPaymentRequest();
-        PGResponse pgResponse = createPGResponse(true, "Payment proccssed successfully", request.getIdempotencyKey());
+        PGResponse pgResponse = mock(PGResponse.class);
 
-        when(paymentRepository.existsByIdempotencyKey(anyString())).thenReturn(false);
-        when(pgService.requestPayment(request)).thenReturn(pgResponse);
-        doThrow(new DataAccessException("Database error"){}).when(paymentRepository).save(any(Payment.class));
+        when(pgService.requestPayment(eq(request))).thenThrow(new RuntimeException(
+                "An unexpected error occurred. Please contact support"));
 
         // when
-        boolean result = paymentService.processPayment(request);
+        assertThrows(PaymentProcessingException.class, () -> paymentService.processPayment(request));
 
-        // then
-        assertTrue(result);
+        verify(pgService).requestPayment(any(PaymentRequest.class));
+    }
 
-        // Captured Payment
-        Payment savedPayment = getCapturedPayment();
-        assertPaymentDetailsMatch(request, savedPayment, PaymentStatus.SUCCESSFUL, "PG");
+    @Test
+    void processPaymentUnexpectedFailureAtPaymentPersistence(){
+        // given
+        PaymentRequest request = createPaymentRequest();
+        PGResponse pgResponse = mock(PGResponse.class);
+
+        when(pgService.requestPayment(eq(request))).thenThrow(new RuntimeException(
+                "An unexpected error occurred. Please contact support"));
+
+        // when
+        assertThrows(PaymentProcessingException.class, () -> paymentService.processPayment(request));
+
+        verify(pgService).requestPayment(any(PaymentRequest.class));
     }
 }
