@@ -4,3 +4,4 @@
 ## Trouble Shooting
 - [Nginx 로드밸런서가 2개의 서버중 하나만 연결하는 이슈](https://ydmins.com/104)
 - [EC2(nGrinder Agent)의 요청이 로컬(nGrinder Controller)로 도달하지 않는 이슈](https://ydmins.com/105)
+- Issues #17 [성능 테스트 적정 환경 찾기 (Feat. 매번 같은 양사의 메트릭 측정 됨](https://ydmins.com/113)
