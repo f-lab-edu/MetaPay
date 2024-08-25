@@ -6,3 +6,4 @@
 - [EC2(nGrinder Agent)의 요청이 로컬(nGrinder Controller)로 도달하지 않는 이슈](https://ydmins.com/105)
 - Issues #17 [성능 테스트 적정 환경 찾기 (Feat. 매번 같은 양사의 메트릭 측정 됨](https://ydmins.com/113)
 - Issues #19 [AWS EC2 작동중인데 연결 안되는 이슈 (Feat. 연결 추적 테이블 nf_conntrack table full)](https://ydmins.com/114)
+- [EC2 로드밸런서로 요청이 전달되지 않는 이슈](https://ydmins.com/115)
