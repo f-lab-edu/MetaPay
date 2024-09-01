@@ -5,6 +5,7 @@ import com.ydmins.metapay.payment_service.domain.payment.PaymentMethod;
 import com.ydmins.metapay.payment_service.domain.payment.PaymentStatus;
 import com.ydmins.metapay.payment_service.domain.payment.dto.PGResponse;
 import com.ydmins.metapay.payment_service.domain.payment.dto.PaymentRequest;
+import com.ydmins.metapay.payment_service.exception.PaymentNotFoundException;
 import com.ydmins.metapay.payment_service.exception.PaymentPersistenceException;
 import com.ydmins.metapay.payment_service.repository.PaymentRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,8 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -31,4 +34,13 @@ public class PaymentPersistenceServiceImpl implements PaymentPersistenceService{
         }
     }
 
+    @Override
+    public Payment findPayment(Long paymentId) {
+        try{
+            return paymentRepository.findById(paymentId).orElseThrow(()-> new PaymentNotFoundException("Payment detail not found with paymentId: "+paymentId));
+        } catch(Exception e) {
+            log.error("Error occurred while finding payment detail with paymentId : "+paymentId, e);
+            throw new PaymentPersistenceException("Payment detail not found with paymentId: "+paymentId, e);
+        }
+    }
 }

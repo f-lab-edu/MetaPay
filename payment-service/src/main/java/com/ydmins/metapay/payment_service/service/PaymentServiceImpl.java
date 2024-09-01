@@ -3,9 +3,11 @@ package com.ydmins.metapay.payment_service.service;
 import com.ydmins.metapay.payment_service.domain.payment.Payment;
 import com.ydmins.metapay.payment_service.domain.payment.PaymentMethod;
 import com.ydmins.metapay.payment_service.domain.payment.PaymentStatus;
+import com.ydmins.metapay.payment_service.domain.payment.dto.GetPaymentResponse;
 import com.ydmins.metapay.payment_service.domain.payment.dto.PGResponse;
 import com.ydmins.metapay.payment_service.domain.payment.dto.PaymentRequest;
 import com.ydmins.metapay.payment_service.exception.*;
+import com.ydmins.metapay.payment_service.service.mapper.PaymentMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -34,6 +36,23 @@ public class PaymentServiceImpl implements PaymentService{
             throw new PaymentProcessingException("An unexpected error occurred. Please contact support", e);
         }
         return false;
+    }
+
+    @Override
+    public GetPaymentResponse getPaymentDetail(Long paymentId) {
+        try {
+            Payment payment = paymentPersistenceService.findPayment(paymentId);
+            return PaymentMapper.toGetPaymentResponse(payment);
+        } catch(PaymentNotFoundException e) {
+            log.error("Payment detail not found with paymentId: "+paymentId, e);
+            throw new PaymentNotFoundException("Payment detail not found with paymentId: "+paymentId);
+        } catch(PaymentPersistenceException e){
+            log.error("Payment not found for payment id : ", paymentId, e);
+            throw new PaymentPersistenceException("Payment not found", e);
+        } catch(Exception e){
+            log.error("Unexpected error occurred while getting payment details for id: {}", paymentId, e);
+            throw new PaymentServiceException("Unexpected error occurred", e);
+        }
     }
 
     private Payment createPaymentFromRequest(PaymentRequest request){
