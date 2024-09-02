@@ -35,12 +35,7 @@ public class PaymentPersistenceServiceImpl implements PaymentPersistenceService{
     }
 
     @Override
-    public Payment findPayment(Long paymentId) {
-        try{
-            return paymentRepository.findById(paymentId).orElseThrow(()-> new PaymentNotFoundException("Payment detail not found with paymentId: "+paymentId));
-        } catch(Exception e) {
-            log.error("Error occurred while finding payment detail with paymentId : "+paymentId, e);
-            throw new PaymentPersistenceException("Payment detail not found with paymentId: "+paymentId, e);
-        }
+    public Optional<Payment> findPayment(Long paymentId) {
+        return paymentRepository.findById(paymentId);
     }
 }

@@ -11,6 +11,9 @@ import com.ydmins.metapay.payment_service.service.mapper.PaymentMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import static com.ydmins.metapay.payment_service.common.PaymentMessages.*;
+
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -40,18 +43,13 @@ public class PaymentServiceImpl implements PaymentService{
 
     @Override
     public GetPaymentResponse getPaymentDetail(Long paymentId) {
-        try {
-            Payment payment = paymentPersistenceService.findPayment(paymentId);
+        Optional<Payment> optionalPayment = paymentPersistenceService.findPayment(paymentId);
+        if(optionalPayment.isPresent()){
+            log.info(PAYMENT_DETAIL_RETRIEVED);
+            Payment payment = optionalPayment.get();
             return PaymentMapper.toGetPaymentResponse(payment);
-        } catch(PaymentNotFoundException e) {
-            log.error("Payment detail not found with paymentId: "+paymentId, e);
-            throw new PaymentNotFoundException("Payment detail not found with paymentId: "+paymentId);
-        } catch(PaymentPersistenceException e){
-            log.error("Payment not found for payment id : ", paymentId, e);
-            throw new PaymentPersistenceException("Payment not found", e);
-        } catch(Exception e){
-            log.error("Unexpected error occurred while getting payment details for id: {}", paymentId, e);
-            throw new PaymentServiceException("Unexpected error occurred", e);
+        } else {
+            throw new PaymentNotFoundException(PAYMENT_NOT_FOUND+paymentId);
         }
     }
 
