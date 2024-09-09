@@ -23,4 +23,6 @@ public class GetPaymentResponse {
     private String paymentGateway;
     private String userId;
     private String orderId;
+
+    public GetPaymentResponse() {}
 }
