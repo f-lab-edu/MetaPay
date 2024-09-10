@@ -1,1 +1,2 @@
 application-mysql.properties
+application-redis.properties
