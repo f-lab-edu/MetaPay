@@ -10,6 +10,7 @@ import com.ydmins.metapay.payment_service.exception.*;
 import com.ydmins.metapay.payment_service.service.mapper.PaymentMapper;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import static com.ydmins.metapay.payment_service.common.PaymentMessages.*;
 
@@ -42,6 +43,7 @@ public class PaymentServiceImpl implements PaymentService{
     }
 
     @Override
+    @Cacheable(value="payment", key="#paymentId")
     public GetPaymentResponse getPaymentDetail(Long paymentId) {
         Optional<Payment> optionalPayment = paymentPersistenceService.findPayment(paymentId);
         if(optionalPayment.isPresent()){
