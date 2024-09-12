@@ -5,6 +5,9 @@
 - Issues #18 [로드밸런스 도입해 서비스 이중화하기](https://ydmins.com/120)
 - Issuss #26 [REDIS를 이용해 캐시 도입하기](https://ydmins.tistory.com/124)
 
+## Performance Analysis
+- Issues #26 [REDIS 캐시 도입 후 성능 변화](https://ydmins.tistory.com/125)
+
 ## Trouble Shooting
 - [Nginx 로드밸런서가 2개의 서버중 하나만 연결하는 이슈](https://ydmins.com/104)
 - [EC2(nGrinder Agent)의 요청이 로컬(nGrinder Controller)로 도달하지 않는 이슈](https://ydmins.com/105)
