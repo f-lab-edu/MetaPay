@@ -20,9 +20,11 @@ ENV PORT=8080
 EXPOSE $PORT
 COPY --from=test-stage /app/build/libs/*.jar app.jar
 COPY /src/main/resources/application-mysql.properties /app/config/application-mysql.properties
+COPY /src/main/resources/application-redis.properties /app/config/application-redis.properties
 ENV SPRING_PROFILES_ACTIVE=mysql
 ENV SPRING_DATASOURCE_URL=$SPRING_DATASOURCE_URL
 ENV SPRING_DATASOURCE_USERNAME=$SPRING_DATASOURCE_USERNAME
 ENV SPRING_DATASOURCE_PASSWORD=$SPRING_DATASOURCE_PASSWORD
+ENV SPRING_REDIS_CLUSTER_NODES=$SPRING_REDIS_CLUSTER_NODES
 ENV JAVA_OPTS="-Xms256m -Xmx512m"
-ENTRYPOINT ["java", "-jar", "app.jar", "--spring.config.additional-location=file:/app/config/application-mysql.properties"]
+ENTRYPOINT ["java", "-jar", "app.jar", "--spring.config.additional-location=file:/app/config/application-mysql.properties,file:/app/config/application-redis.properties"]
