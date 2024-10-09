@@ -25,6 +25,26 @@ public class PaymentMessages {
     public static final String PAYMENT_CANCEL_REQUEST_FAILURE = "Payment cancellation failed: Payment already processed";
     public static final String PAYMENT_CANCEL_REQUEST_ERROR = "Error processing payment cancellation request";
 
+    // PAYMENT REFUND PROCESSING
+    public static final String PREFUND_SUCCESS = "Refund processed successfully";
+    public static final String REFUND_FAILURE_PAYMENT_NOT_FOUND = "Refund processing failed: Original payment not found";
+    public static final String REFUND_PROCESSING_ERROR = "Refund processing error: Please try again later";
+
+    // PAYMENT METHOD REGISTRATION
+    public static final String PAYMENT_METHOD_REGISTRATION_SUCCESS = "Payment method registered successfully";
+    public static final String PAYMENT_METHOD_REGISTRATION_FAILURE = "Failed to register payment method";
+    public static final String PAYMENT_METHOD_ALREADY_EXISTS = "Payment method already exists";
+
+    // PAYMENT METHOD RETRIEVAL
+    public static final String PAYMENT_METHOD_RETRIEVED = "Payment method retrieved successfully";
+    public static final String PAYMENT_METHOD_NOT_FOUND = "Payment method not found";
+    public static final String PAYMENT_METHOD_LIST_RETRIEVED = "Payment method list retrieved successfully";
+    public static final String PAYMENT_METHOD_LIST_EMPTY = "No payment methods found";
+
+    // PAYMENT METHOD DELETION
+    public static final String PAYMENT_METHOD_DELETION_SUCCESS = "Payment method deleted successfully";
+    public static final String PAYMENT_METHOD_DELETION_FAILURE = "Failed to delete payment method";
+
     public PaymentMessages(){
         // prevent instantiation
     }
